@@ -19,7 +19,6 @@ class Server {
     private DatagramSocket socket;
     private InetAddress lastAddress;
     private int lastPort;
-    private int lastWorkID;
     private HashMap<String, int[]> count = new HashMap<>();
 
     Server(int port) {
@@ -45,26 +44,27 @@ class Server {
             if (lastAddress != null && (!packet.getAddress().equals(lastAddress) || packet.getPort() != lastPort)) {
                 String key = lastAddress.toString().substring(1) + "_" + lastPort;
                 try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(key + ".txt", true)))) {
-                    int[] lastData = count.containsKey(key) ? count.get(key) : new int[3];
+                    int[] lastData = count.containsKey(key) ? count.get(key) : new int[4];
                     out.println("Objects received: " + lastData[1]);
                     out.println("Objects lost: " + (lastData[2] - lastData[1]));
                     out.println("Mean response time: " + lastData[0] / lastData[1] + " ms");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                lastWorkID = 0;
             }
             String key = packet.getAddress().toString().substring(1) + "_" + packet.getPort();
-            int[] currentData = count.containsKey(key) ? count.get(key) : new int[3];
+            int[] currentData = count.containsKey(key) ? count.get(key) : new int[4];
             currentData[0] += diff;
             currentData[1]++;
-            if (Integer.parseInt(msg.split(SEPARATOR)[3].trim()) != lastWorkID)
+            int workID = Integer.parseInt(msg.split(SEPARATOR)[3].trim());
+            if (workID > currentData[3]) {
                 currentData[2] += Integer.parseInt(msg.split(SEPARATOR)[2].trim());
+                currentData[3] = workID;
+            }
             // Changes last IP, port and workID to packet values
             count.put(key, currentData);
             lastAddress = packet.getAddress();
             lastPort = packet.getPort();
-            lastWorkID = Integer.parseInt(msg.split(SEPARATOR)[3].trim());
             // Show data on server console
             System.out.println("\nHost: " + packet.getAddress() + "\nPort: " + packet.getPort() + "\nLength: "
                     + packet.getLength() + "\nObjectNumber: " + numSeq + "\nElapsed time (ms) : " + diff);
