@@ -12,6 +12,6 @@ public class StartServer {
 		} else {
 			server = new Server(1234);
 		}
-		server.readyToReceivPacket();
+		server.readyToReceivePacket();
 	}
 }

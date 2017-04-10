@@ -13,40 +13,36 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
-public class Client extends JFrame {
+class Client extends JFrame {
 
+	private int workID = 0;
 	private DatagramSocket socket;
-	public final static String SEPARATOR = ";";
+	private final static String SEPARATOR = ";";
 	private static final String DEFAULT_SERVER_IP = "localhost";
 	private static final int DEFAULT_PORT = 1234;
 	private static final int DEFAULT_OBJECTS_NUMBER = 5;
-	private JButton uploadFileButton = new JButton("Send objects");
-	private JPanel mainPanel = new JPanel();
-	private final JLabel lblServerIp = new JLabel("Server IP: ");
-	private final JLabel lblServerPort = new JLabel("Server PORT: ");
-	private final JLabel lblObjectsNumber = new JLabel("No. of objects:");
-	private final JTextField txtFieldIP = new JTextField();
+    private final JTextField txtFieldIP = new JTextField();
 	private final JTextField txtFieldPort = new JTextField();
 	private final JTextField txtFieldObjectsNumber = new JTextField();
 
-	public Client() {
+	Client() {
 		super("UDP Client");
-		mainPanel.setLayout(null);
-		lblServerIp.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(null);
+        JLabel lblServerIp = new JLabel("Server IP: ");
+        lblServerIp.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		lblServerIp.setBounds(24, 27, 143, 56);
 		mainPanel.add(lblServerIp);
 
-		lblServerPort.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        JLabel lblServerPort = new JLabel("Server PORT: ");
+        lblServerPort.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		lblServerPort.setBounds(24, 69, 190, 56);
 		mainPanel.add(lblServerPort);
 
-		lblObjectsNumber.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        JLabel lblObjectsNumber = new JLabel("No. of objects:");
+        lblObjectsNumber.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		lblObjectsNumber.setBounds(24, 111, 255, 56);
 		mainPanel.add(lblObjectsNumber);
 
@@ -62,13 +58,15 @@ public class Client extends JFrame {
 		txtFieldObjectsNumber.setBounds(413, 124, 95, 22);
 		mainPanel.add(txtFieldObjectsNumber);
 
-		uploadFileButton.setBounds(170, 180, 200, 50);
+        JButton uploadFileButton = new JButton("Send objects");
+        uploadFileButton.setBounds(170, 180, 200, 50);
 		mainPanel.add(uploadFileButton);
 		uploadFileButton.addActionListener((ActionEvent evt) -> {
+			workID++;
 			try {
 				int numObjects = Integer.parseInt(txtFieldObjectsNumber.getText());
 				for (int i = 1; i <= numObjects; i++) {
-					String msg = i + SEPARATOR + System.currentTimeMillis() + SEPARATOR + numObjects;
+					String msg = i + SEPARATOR + System.currentTimeMillis() + SEPARATOR + numObjects + SEPARATOR + workID;
 					byte buff[] = msg.getBytes();
 					DatagramPacket packetSend = new DatagramPacket(buff, buff.length,
 							InetAddress.getByName(txtFieldIP.getText()), Integer.parseInt(txtFieldPort.getText()));
@@ -87,7 +85,7 @@ public class Client extends JFrame {
 
 		super.setSize(new Dimension(540, 300));
 		super.setVisible(true);
-		super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		super.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		try {
 			socket = new DatagramSocket();
